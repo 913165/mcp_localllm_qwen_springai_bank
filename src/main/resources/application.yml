@@ -7,6 +7,9 @@ spring:
     openai:
       base-url: http://localhost:1234/v1
       api-key: ${LM_API_TOKEN:lm-studio}
+      # Local LLMs (LM Studio) often need longer than the default 60s
+      timeout: 5m
       chat:
+        timeout: 5m
         options:
           model: qwen/qwen3-8b
