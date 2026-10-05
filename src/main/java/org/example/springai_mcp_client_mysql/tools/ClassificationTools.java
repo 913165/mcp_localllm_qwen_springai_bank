@@ -32,6 +32,9 @@ public class ClassificationTools {
             @ToolParam(description = "Processing stage, e.g. CBS_DEBIT, NPCI_FORWARD, CBS_REVERSAL, BENEFICIARY_CREDIT, HSM_VERIFY") String stage) {
 
         long start = System.currentTimeMillis();
+        System.out.println(">>> [TOOL START] classify_error(respCode=" + respCode + ", stage=" + stage + ")");
+        log.info("[TOOL START] classify_error(respCode={}, stage={})", respCode, stage);
+
         RuleMatch result = jdbc.sql("""
                         SELECT category, default_severity, create_incident,
                                runbook_ref, description, guidance
@@ -51,9 +54,14 @@ public class ClassificationTools {
                 .optional()
                 .orElseGet(RuleMatch::noMatch);
 
-        log.info("classify_error(respCode={}, stage={}) -> matched={} severity={} in {}ms",
-                respCode, stage, result.matched(), result.defaultSeverity(),
-                System.currentTimeMillis() - start);
+        long elapsed = System.currentTimeMillis() - start;
+        System.out.println("<<< [TOOL DONE ] classify_error -> matched=" + result.matched()
+                + " category=" + result.category()
+                + " severity=" + result.defaultSeverity()
+                + " createIncident=" + result.createIncident()
+                + " (" + elapsed + "ms)");
+        log.info("[TOOL DONE] classify_error(respCode={}, stage={}) -> matched={} severity={} in {}ms",
+                respCode, stage, result.matched(), result.defaultSeverity(), elapsed);
         return result;
     }
 }

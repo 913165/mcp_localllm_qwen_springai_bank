@@ -1,6 +1,8 @@
 package org.example.springai_mcp_client_mysql.web;
 
+import org.example.springai_mcp_client_mysql.agent.UpiErrorChainAgent;
 import org.example.springai_mcp_client_mysql.model.ClassificationResult;
+import org.example.springai_mcp_client_mysql.model.HandleResult;
 import org.example.springai_mcp_client_mysql.model.UpiErrorEvent;
 import org.example.springai_mcp_client_mysql.service.UpiErrorClassificationService;
 import org.springframework.ai.chat.model.ChatModel;
@@ -19,16 +21,19 @@ import java.util.Map;
 public class UpiErrorController {
 
     private final UpiErrorClassificationService service;
+    private final UpiErrorChainAgent chainAgent;
     private final ChatModel chatModel;
     private final String configuredModel;
     private final String baseUrl;
 
     public UpiErrorController(
             UpiErrorClassificationService service,
+            UpiErrorChainAgent chainAgent,
             ChatModel chatModel,
             @Value("${spring.ai.openai.chat.options.model}") String configuredModel,
             @Value("${spring.ai.openai.base-url}") String baseUrl) {
         this.service = service;
+        this.chainAgent = chainAgent;
         this.chatModel = chatModel;
         this.configuredModel = configuredModel;
         this.baseUrl = baseUrl;
@@ -40,6 +45,16 @@ public class UpiErrorController {
             return ResponseEntity.badRequest().body("respCode, stage and reason are required");
         }
         ClassificationResult result = service.classify(event);
+        return ResponseEntity.ok(result);
+    }
+
+    /** Chain: LLM classify once, then create incident in Java from severity. */
+    @PostMapping("/handle")
+    public ResponseEntity<?> handle(@RequestBody UpiErrorEvent event) {
+        if (event.respCode() == null || event.stage() == null || event.reason() == null) {
+            return ResponseEntity.badRequest().body("respCode, stage and reason are required");
+        }
+        HandleResult result = chainAgent.handle(event);
         return ResponseEntity.ok(result);
     }
 
