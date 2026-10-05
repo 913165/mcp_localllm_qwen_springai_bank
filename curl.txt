@@ -1,0 +1,14 @@
+curl -s -X POST http://localhost:8080/api/errors -H 'Content-Type: application/json' -d '{
+ "timestamp":"2026-10-05T10:42:17.381","component":"upi-switch","stage":"CBS_DEBIT","respCode":"91",
+ "reason":"CBS response timeout after 30000ms","rrn":"627810421733","txnId":"UPI20261005104217A91F",
+ "amount":2500.00,"extra":{"cbsHost":"cbs-prod-02","status":"DEEMED"}}'
+
+curl -s -X POST http://localhost:8080/api/errors -H 'Content-Type: application/json' -d '{
+ "timestamp":"2026-10-05T10:43:02.115","component":"upi-switch","stage":"CBS_DEBIT","respCode":"51",
+ "reason":"Insufficient funds","rrn":"627810430212","txnId":"UPI20261005104302C4D2",
+ "amount":18400.00,"extra":{"availBal":3120.55}}'
+
+curl -s -X POST http://localhost:8080/api/errors -H 'Content-Type: application/json' -d '{
+ "timestamp":"2026-10-05T10:45:45.004","component":"npci-gateway","stage":"NPCI_FORWARD","respCode":"U30",
+ "reason":"Unable to acquire connection from pool within 5000ms","rrn":"627810454502",
+ "txnId":"UPI20261005104545F1A8","extra":{"npciEndpoint":"upi-npci-prod-mum"}}'
